@@ -1,0 +1,29 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns:m="sap.m" xmlns="sap.ui.table" controllerName="ns.mta04.mta04.controller.View1" displayBlock="true">
+    <m:Page id="page" title="{i18n>title}">
+        <m:content>
+<Table enableCellFilter="true" selectionMode="None"  visibleRowCount="15" id="idTabel01" rows="{textModel>/}">
+                                <columns>
+                                    <Column id="c1" width="25%">
+                                        <m:Label text="Product ID" id="l1"/>
+                                        <template>
+                                            <m:Text text="{textModel>ProductID}" id="t1" />
+                                        </template>
+                                    </Column>
+                                    <Column width="50%" id="c2">
+                                        <m:Label text="Product Name" id="l2" />
+                                        <template>
+                                            <m:Text text="{textModel>ProductName}" id="t2" />
+                                        </template>
+                                    </Column>
+                                     <Column width="25%" id="c3">
+                                        <m:Label text="Unit Price" id="l3" />
+                                        <template>
+                                            <m:Text text="{textModel>UnitPrice}" id="t3" />
+                                        </template>
+                                    </Column>
+                                    </columns>
+                               
+                            </Table>
+        </m:content>
+    </m:Page>
+</mvc:View>

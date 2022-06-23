@@ -1,0 +1,111 @@
+_schema-version: "3.2"
+ID: MTA04
+version: 0.0.1
+modules:
+- name: API_NodeJS
+  type: nodejs
+  path: ./API_WITH_XSUAA
+  requires:
+  - name: uaa_MTA04
+  provides:
+  - name: srv-api-nodejs
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm-ci
+- name: MTA04-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: MTA04-destination-service
+    parameters:
+      content-target: true
+  - name: MTA04_html_repo_host
+    parameters:
+      service-key:
+        name: MTA04_html_repo_host-key
+  - name: srv-api-nodejs         
+  - name: uaa_MTA04
+    parameters:
+      service-key:
+        name: uaa_MTA04-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Authentication: OAuth2UserTokenExchange
+          Name: api-nodejs-srv
+          TokenServiceInstanceName: MTA04-xsuaa-service
+          TokenServiceKeyName: uaa_MTA04-key
+          URL: ~{srv-api-nodejs/srv-url}        
+        - Name: MTA04_MTA04_html_repo_host
+          ServiceInstanceName: MTA04-html5-app-host-service
+          ServiceKeyName: MTA04_html_repo_host-key
+          sap.cloud.service: MTA04
+        - Authentication: OAuth2UserTokenExchange
+          Name: MTA04_uaa_MTA04
+          ServiceInstanceName: MTA04-xsuaa-service
+          ServiceKeyName: uaa_MTA04-key
+          sap.cloud.service: MTA04
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: MTA04-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: MTA04_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - nsmta04mta04.zip
+      name: nsmta04mta04
+      target-path: resources/
+- name: nsmta04mta04
+  type: html5
+  path: mta04
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: MTA04-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: MTA04-destination-service
+    service-plan: lite
+- name: MTA04_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: MTA04-html5-app-host-service
+    service-plan: app-host
+- name: uaa_MTA04
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: MTA04-xsuaa-service
+    service-plan: application
+parameters:
+  deploy_mode: html5-repo
